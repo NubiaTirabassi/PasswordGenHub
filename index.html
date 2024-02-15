@@ -17,40 +17,43 @@
 
 <body>
     <main>
+        <!-- Seção do cabeçalho -->
         <section class="hero">
             <h1 class="title">Gerador de senha</h1>
             <p class="subtitle">Utilize o nosso gerador online para criar uma senha forte e segura.</p>
         </section>
+
+        <!-- Seção principal para a entrada de senha -->
         <section class="box">
             <div class="password">
                 <div class="text">
+                    <!-- Campo de entrada de senha -->
                     <input type="text" name="password" id="password" />
-
                 </div>
                 <div class="actions">
-                    <button id="copy-1"><img src="copy.svg" width="42" />
-                    </button>
-                    <button id="renew"><img src="renew.svg" width="42" />
-                    </button>
+                    <!-- Botões para copiar e renovar senha -->
+                    <button id="copy-1"><img src="copy.svg" width="42" /></button>
+                    <button id="renew"><img src="renew.svg" width="42" /></button>
                 </div>
-
             </div>
+            <!-- Indicador de segurança da senha -->
             <div class="security-indicator">
-                <div id="security-indicator-bar" class="bar critical">
-                </div>
+                <div id="security-indicator-bar" class="bar"></div>
             </div>
         </section>
 
+        <!-- Seção para personalização da senha -->
         <section class="box customize">
             <h3 class="title">Personalizar</h3>
             <div class="actions">
                 <div class="password-length">
-
+                    <!-- Controle deslizante para ajustar o tamanho da senha -->
                     <p>Tamanho: <span id="password-length-text">16</span></p>
                     <input type="range" name="password-length" id="password-length" class="slider" value="16" min="4"
                         max="64" />
                 </div>
                 <div class="config">
+                    <!-- Checkboxes para incluir tipos específicos de caracteres -->
                     <label class="checkbox-container">
                         <span class="text">Maiúsculas</span>
                         <input type="checkbox" id="uppercase-check" checked />
@@ -69,72 +72,125 @@
                 </div>
             </div>
         </section>
+
+        <!-- Botão para copiar a senha gerada -->
         <div class="submit">
             <button id="copy-2">Copiar senha</button>
         </div>
     </main>
     <script>
-        
-        const inputEl = document.querySelector("#password")
-        const upperCaseCheckEl = document.querySelector("#uppercase-check")
-        const numberCheckEl = document.querySelector("#number-check")
-        const symbolCheckEl = document.querySelector("#symbol-check")
-        const securityIndicatorBarEl = document.querySelector("#security-indicator-bar")
+        // Selecionando elementos do DOM
+        const inputElement = document.querySelector("#password");
+        const upperCaseCheckbox = document.querySelector("#uppercase-check");
+        const numberCheckbox = document.querySelector("#number-check");
+        const symbolCheckbox = document.querySelector("#symbol-check");
+        const securityIndicatorBar = document.querySelector("#security-indicator-bar");
+        const passwordLengthElement = document.querySelector("#password-length");
 
-        let passwordLength = 16
+        let passwordLength = 16;
 
-        function calculateQuality() {
-            const percent = Math.round((passwordLength / 64) * 100)
-            console.log(percent)
-            securityIndicatorBarEl.style.width = `${percent}%`
+        // Função para calcular a qualidade da senha
+        function calculatePasswordQuality() {
+            const percent = Math.round((passwordLength / 64) * 25 +
+                (upperCaseCheckbox.checked ? 15 : 0) +
+                (numberCheckbox.checked ? 25 : 0) +
+                (symbolCheckbox.checked ? 35 : 0));
+
+            // Atualizando a largura da barra de indicador de segurança
+            securityIndicatorBar.style.width = `${percent}%`;
+
+            // Adicionando classes com base na qualidade da senha
+            if (percent > 69) {
+                securityIndicatorBar.classList.remove("critical", "warning");
+                securityIndicatorBar.classList.add("safe");
+            } else if (percent > 50) {
+                securityIndicatorBar.classList.remove("critical", "safe");
+                securityIndicatorBar.classList.add("warning");
+            } else {
+                securityIndicatorBar.classList.remove("warning", "safe");
+                securityIndicatorBar.classList.add("critical");
+            }
+
+            // Adicionando classe "completed" se a segurança for 100%
+            if (percent >= 100) {
+                securityIndicatorBar.classList.add("completed");
+            } else {
+                securityIndicatorBar.classList.remove("completed");
+            }
         }
 
+        // Função para calcular o tamanho da fonte
+        function calculateFontSize() {
+            if (passwordLength > 45) {
+                inputElement.classList.remove("font-sm", "font-xs");
+                inputElement.classList.add("font-xxs");
+            } else if (passwordLength > 32) {
+                inputElement.classList.remove("font-sm", "font-xxs");
+                inputElement.classList.add("font-xs");
+            } else if (passwordLength > 22) {
+                inputElement.classList.remove("font-xs", "font-xxs");
+                inputElement.classList.add("font-sm");
+            } else {
+                inputElement.classList.remove("font-sm", "font-xs", "font-xxs");
+            }
+        }
+
+        // Função para gerar a senha
         function generatePassword() {
+            let chars = "abcdefghjklmnpqrstuvwxz";
+            const upperCaseChars = "ABCDEFGHJKLMNPQRSTUVWXZ";
+            const numberChars = "123456789";
+            const symbolChars = "?!@#$%^&*()[]";
 
-            let chars = "abcdefghjklmnpqrstuvwxz"
-
-            const upperCaseChars = "ABCDEFGHJKLMNPQRSTUVWXZ"
-            const numberChars = "123456789"
-            const symbolChars = "?!@#$%^&*()[]"
-
-            if (upperCaseCheckEl.checked) {
-                chars += upperCaseChars
+            // Adicionando tipos de caracteres com base nas configurações
+            if (upperCaseCheckbox.checked) {
+                chars += upperCaseChars;
             }
-            if (numberCheckEl.checked) {
-                chars += numberChars
+            if (numberCheckbox.checked) {
+                chars += numberChars;
             }
-            if (symbolCheckEl.checked) {
-                chars += symbolChars
+            if (symbolCheckbox.checked) {
+                chars += symbolChars;
             }
 
-            let password = ""
-
+            // Gerando a senha
+            let password = "";
             for (let i = 0; i < passwordLength; i++) {
-                const randomNumber = Math.floor(Math.random() * chars.length)
-                password += chars.substring(randomNumber, randomNumber + 1)
+                const randomNumber = Math.floor(Math.random() * chars.length);
+                password += chars.substring(randomNumber, randomNumber + 1);
             }
 
-            inputEl.value = password
-            calculateQuality()
+            // Atualizando o campo de entrada com a senha gerada
+            inputElement.value = password;
+            // Calculando a qualidade da senha e ajustando a fonte
+            calculatePasswordQuality();
+            calculateFontSize();
         }
 
-        function copy() {
-            navigator.clipboard.writeText(inputEl.value)
+        // Função para copiar a senha
+        function copyPassword() {
+            navigator.clipboard.writeText(inputElement.value);
         }
-        const passwordLengthEl = document.querySelector("#password-length")
-        passwordLengthEl.addEventListener("input", function () {
-            const passwordLength = passwordLengthEl.value
-            document.querySelector("#password-length-text").innerText = passwordLength
-            generatePassword()
-        })
-        upperCaseCheckEl.addEventListener("click", generatePassword)
-        numberCheckEl.addEventListener("click", generatePassword)
-        symbolCheckEl.addEventListener("click", generatePassword)
 
-        document.querySelector("#copy-1").addEventListener("click", copy)
-        document.querySelector("#copy-2").addEventListener("click", copy)
+        // Atualiza a senha quando o comprimento é alterado
+        passwordLengthElement.addEventListener("input", function () {
+            passwordLength = passwordLengthElement.value;
+            document.querySelector("#password-length-text").innerText = passwordLength;
+            generatePassword();
+        });
 
-        generatePassword()
+        // Atualiza a senha quando as opções são alteradas
+        upperCaseCheckbox.addEventListener("click", generatePassword);
+        numberCheckbox.addEventListener("click", generatePassword);
+        symbolCheckbox.addEventListener("click", generatePassword);
+
+        // Adiciona eventos de clique para os botões de copiar senha
+        document.querySelector("#copy-1").addEventListener("click", copyPassword);
+        document.querySelector("#copy-2").addEventListener("click", copyPassword);
+        document.querySelector("#renew").addEventListener("click", generatePassword);
+
+        // Gera uma senha inicial ao carregar a página
+        generatePassword();
     </script>
 </body>
 
